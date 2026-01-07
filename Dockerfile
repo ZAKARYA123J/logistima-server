@@ -10,7 +10,7 @@ RUN pnpm install
 COPY . .
 
 # If you use TypeScript
-RUN pnpm run build
+# RUN pnpm run build
 
 EXPOSE 3000
 

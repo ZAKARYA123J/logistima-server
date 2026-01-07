@@ -1,16 +1,14 @@
-version: "3.9"
-
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:16
     container_name: postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: app_db
-      POSTGRES_USER: app_user
-      POSTGRES_PASSWORD: root
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "54321:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -29,6 +27,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      - CI=true
+      - DB_HOST=postgres
+      - DB_PORT=5432
     volumes:
       - .:/src
       - /src/node_modules
@@ -37,6 +39,7 @@ services:
       - redis
     ports:
       - "3000:3000"
+    command: sh -c "pnpm install && pnpm run dev"
 volumes:
   postgres_data:
   redis_data:
