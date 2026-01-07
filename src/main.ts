@@ -1,7 +1,8 @@
 import express from "express"
-const PORT=3000
+const PORT = process.env.PORT || 3000;
 const app = express()
 import {sequelize} from "./config/database.js"
+import "../src/models/index.js"
 
 async function bootstrap() {
     const MAX_RETRIES = 20;
@@ -9,9 +10,12 @@ async function bootstrap() {
 
     for (let i = 0; i < MAX_RETRIES; i++) {
         try {
+           
             await sequelize.authenticate();
             console.log('Database authenticate');
-            return; // Connection successful
+            await sequelize.sync({ alter: true });
+            console.log('Database synced');
+            return;
         } catch (err) {
             console.error(`Database connection failed (attempt ${i + 1}/${MAX_RETRIES})`);
             if (i === MAX_RETRIES - 1) {
