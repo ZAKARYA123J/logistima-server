@@ -1,17 +1,11 @@
 {
+  "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",  // 或 "ESNext"
-    "moduleResolution": "NodeNext",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true
+    "rootDir": ".",
+    "noEmit": true,
+    "isolatedModules": true,
+    "types": ["node", "jest"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "jest.config.ts"],
   "exclude": ["node_modules", "dist"]
 }
