@@ -1,7 +1,11 @@
 import express from "express";
-const PORT = 3000;
-const app = express();
+const PORT = process.env.PORT || 3000;
+export const app = express();
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: "OK" });
+});
 import { sequelize } from "./config/database.js";
+import "../src/models/index.js";
 async function bootstrap() {
     const MAX_RETRIES = 20;
     const RETRY_DELAY = 5000; // 5 seconds
@@ -9,7 +13,9 @@ async function bootstrap() {
         try {
             await sequelize.authenticate();
             console.log('Database authenticate');
-            return; // Connection successful
+            await sequelize.sync({ alter: true });
+            console.log('Database synced');
+            return;
         }
         catch (err) {
             console.error(`Database connection failed (attempt ${i + 1}/${MAX_RETRIES})`);
@@ -21,7 +27,9 @@ async function bootstrap() {
         }
     }
 }
-bootstrap();
-app.listen(PORT, () => {
-    console.log(`Server is Runing on ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    bootstrap();
+    app.listen(PORT, () => {
+        console.log(`Server is Runing on ${PORT}`);
+    });
+}

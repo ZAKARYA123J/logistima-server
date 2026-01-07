@@ -1,6 +1,11 @@
 import express from "express"
 const PORT = process.env.PORT || 3000;
-const app = express()
+export const app = express()
+
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: "OK" });
+});
+
 import {sequelize} from "./config/database.js"
 import "../src/models/index.js"
 
@@ -26,7 +31,9 @@ async function bootstrap() {
         }
     }
 }
-bootstrap()
-app.listen(PORT,()=>{
-    console.log(`Server is Runing on ${PORT}`)
-})
+if (process.env.NODE_ENV !== 'test') {
+    bootstrap()
+    app.listen(PORT,()=>{
+        console.log(`Server is Runing on ${PORT}`)
+    })
+}
