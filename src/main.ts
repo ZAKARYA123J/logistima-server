@@ -8,7 +8,7 @@ import { sequelize } from "./config/database.js";
 const redisUrl = 'redis://localhost:6379';
 const client = redis.createClient({ url: redisUrl });
 
-client.on("error", (error) => {
+client.on("error", (error:any) => {
     console.error("Redis ERROR***", error);
 });
 
@@ -28,7 +28,7 @@ async function bootstrap() {
         try {
             await sequelize.authenticate();
             console.log('Database authenticated');
-            return; // Connection successful
+            return;
         } catch (err) {
             console.error(`Database connection failed (attempt ${i + 1}/${MAX_RETRIES})`);
             if (i === MAX_RETRIES - 1) {
