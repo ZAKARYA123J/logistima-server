@@ -1,11 +1,19 @@
 import express from "express";
-const PORT = process.env.PORT || 3000;
-export const app = express();
-app.get('/health', (req, res) => {
-    res.status(200).json({ status: "OK" });
-});
+import redis from "redis";
+const PORT = 3000;
+const app = express();
 import { sequelize } from "./config/database.js";
-import "../src/models/index.js";
+const redisUrl = 'redis://localhost:6379';
+const client = redis.createClient({ url: redisUrl });
+client.on("error", (error) => {
+    console.error("Redis ERROR***", error);
+});
+client.on("connect", () => {
+    console.log("Redis connected.");
+});
+(async () => {
+    await client.connect();
+})();
 async function bootstrap() {
     const MAX_RETRIES = 20;
     const RETRY_DELAY = 5000; // 5 seconds

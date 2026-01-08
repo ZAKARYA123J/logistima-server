@@ -12,7 +12,7 @@ import "../src/models/index.js"
 async function bootstrap() {
     const MAX_RETRIES = 20;
     const RETRY_DELAY = 5000; // 5 seconds
-
+    
     for (let i = 0; i < MAX_RETRIES; i++) {
         try {
            
