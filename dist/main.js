@@ -27,9 +27,16 @@ async function bootstrap() {
         }
     }
 }
+<<<<<<< HEAD
 if (process.env.NODE_ENV !== 'test') {
     bootstrap();
     app.listen(PORT, () => {
         console.log(`Server is Runing on ${PORT}`);
     });
 }
+=======
+bootstrap();
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+>>>>>>> d893813 (fix error)
