@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ParcelController } from '../controllers/parcel.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
-import { roleMiddleware } from '../middlewares/role.middleware.js';
+import { roleMiddleware, UserRole, Permission, OwnershipCheck } from '../middlewares/role.middleware.js';
 import { validateRequest, validateAtLeastOne, validateFile } from '../middlewares/validation.middleware.js';
 import { body, param, query } from 'express-validator';
 import { logger } from '../utils/logger.js';
@@ -28,7 +28,7 @@ router.use(authMiddleware.authenticate);
  */
 router.get(
     '/',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'support', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPPORT, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('page')
             .optional()
@@ -89,8 +89,8 @@ router.get(
     '/:id',
     validateRequest([parcelIdValidation]),
     roleMiddleware.isOwnerOrHasPermission(
-        'parcel',
-        'parcel:read',
+        OwnershipCheck.PARCEL,
+        Permission.PARCEL_READ,
         'id'
     ),
     parcelController.getParcelById
@@ -115,7 +115,7 @@ router.get(
  */
 router.post(
     '/',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'customer', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.CUSTOMER, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('customerId')
             .isUUID()
@@ -217,7 +217,7 @@ router.post(
  */
 router.put(
     '/:id',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'support', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPPORT, UserRole.SUPER_ADMIN]),
     validateRequest([
         parcelIdValidation,
         body('sender')
@@ -292,8 +292,8 @@ router.patch(
             .withMessage('Proof data must be a string'),
     ]),
     roleMiddleware.isOwnerOrHasPermission(
-        'parcel',
-        'parcel:update',
+        OwnershipCheck.PARCEL,
+        Permission.PARCEL_UPDATE,
         'id'
     ),
     parcelController.updateParcelStatus
@@ -307,7 +307,7 @@ router.patch(
 router.delete(
     '/:id',
     validateRequest([parcelIdValidation]),
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     parcelController.deleteParcel
 );
 
@@ -318,7 +318,7 @@ router.delete(
  */
 router.post(
     '/:id/assign',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         parcelIdValidation,
         body('driverId')
@@ -348,7 +348,7 @@ router.post(
  */
 router.post(
     '/:id/unassign',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         parcelIdValidation,
         body('reason')
@@ -368,8 +368,8 @@ router.get(
     '/:id/history',
     validateRequest([parcelIdValidation]),
     roleMiddleware.isOwnerOrHasPermission(
-        'parcel',
-        'parcel:read',
+        OwnershipCheck.PARCEL,
+        Permission.PARCEL_READ,
         'id'
     ),
     parcelController.getParcelHistory
@@ -384,8 +384,8 @@ router.get(
     '/:id/timeline',
     validateRequest([parcelIdValidation]),
     roleMiddleware.isOwnerOrHasPermission(
-        'parcel',
-        'parcel:read',
+        OwnershipCheck.PARCEL,
+        Permission.PARCEL_READ,
         'id'
     ),
     parcelController.getParcelTimeline
@@ -411,8 +411,8 @@ router.post(
             .toFloat(),
     ]),
     roleMiddleware.isOwnerOrHasPermission(
-        'parcel',
-        'parcel:update',
+        OwnershipCheck.PARCEL,
+        Permission.PARCEL_UPDATE,
         'id'
     ),
     parcelController.cancelParcel
@@ -425,7 +425,7 @@ router.post(
  */
 router.post(
     '/:id/return',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         parcelIdValidation,
         body('reason')
@@ -452,7 +452,7 @@ router.post(
  */
 router.post(
     '/bulk-create',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('parcels')
             .isArray({ min: 1, max: 100 })
@@ -472,7 +472,7 @@ router.post(
  */
 router.post(
     '/bulk-update',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('parcelIds')
             .isArray({ min: 1, max: 100 })
@@ -509,7 +509,7 @@ router.post(
  */
 router.get(
     '/search/suggest',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'support', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPPORT, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('q')
             .isString()
@@ -535,7 +535,7 @@ router.get(
  */
 router.get(
     '/stats/overview',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('period')
             .optional()
@@ -564,7 +564,7 @@ router.get(
  */
 router.get(
     '/metrics/performance',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('metric')
             .isIn(['on_time', 'delivery_time', 'success_rate', 'customer_satisfaction'])
@@ -590,7 +590,7 @@ router.get(
  */
 router.post(
     '/:id/scan',
-    roleMiddleware.hasRole(['driver', 'admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.DRIVER, UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         parcelIdValidation,
         body('scanType')
@@ -619,7 +619,7 @@ router.post(
  */
 router.post(
     '/:id/notify',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'support', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPPORT, UserRole.SUPER_ADMIN]),
     validateRequest([
         parcelIdValidation,
         body('notificationType')

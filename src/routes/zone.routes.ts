@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ZoneController } from '../controllers/zone.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
-import { roleMiddleware } from '../middlewares/role.middleware.js';
+import { roleMiddleware, UserRole, Permission } from '../middlewares/role.middleware.js';
 import { validateRequest, validateAtLeastOne, validateFile } from '../middlewares/validation.middleware.js';
 import { body, param, query } from 'express-validator';
 import { logger } from '../utils/logger.js';
@@ -49,7 +49,7 @@ router.use(authMiddleware.authenticate);
  */
 router.get(
     '/',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'driver', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.DRIVER, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('page')
             .optional()
@@ -90,7 +90,7 @@ router.get(
 router.get(
     '/:id',
     validateRequest([zoneIdValidation]),
-    roleMiddleware.hasPermission('zone:read'),
+    roleMiddleware.hasPermission(Permission.ZONE_READ),
     zoneController.getZoneById
 );
 
@@ -101,7 +101,7 @@ router.get(
  */
 router.post(
     '/',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('name')
             .trim()
@@ -165,7 +165,7 @@ router.post(
  */
 router.put(
     '/:id',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('name')
@@ -232,7 +232,7 @@ router.put(
 router.delete(
     '/:id',
     validateRequest([zoneIdValidation]),
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     zoneController.deleteZone
 );
 
@@ -243,7 +243,7 @@ router.delete(
  */
 router.get(
     '/locate',
-    roleMiddleware.hasPermission('zone:read'),
+    roleMiddleware.hasPermission(Permission.ZONE_READ),
     validateRequest([
         query('lat')
             .isFloat({ min: -90, max: 90 })
@@ -269,7 +269,7 @@ router.get(
  */
 router.post(
     '/bulk-locate',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('coordinates')
             .isArray({ min: 1, max: 100 })
@@ -293,7 +293,7 @@ router.post(
  */
 router.get(
     '/:id/overlap',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([zoneIdValidation]),
     zoneController.checkZoneOverlap
 );
@@ -305,7 +305,7 @@ router.get(
  */
 router.get(
     '/:id/drivers',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([zoneIdValidation]),
     zoneController.getZoneDrivers
 );
@@ -317,7 +317,7 @@ router.get(
  */
 router.get(
     '/:id/deliveries',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         query('status')
@@ -353,7 +353,7 @@ router.get(
  */
 router.get(
     '/:id/stats',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         query('period')
@@ -371,7 +371,7 @@ router.get(
  */
 router.post(
     '/:id/assign-driver',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('driverId')
@@ -393,7 +393,7 @@ router.post(
  */
 router.post(
     '/:id/remove-driver',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('driverId')
@@ -410,7 +410,7 @@ router.post(
  */
 router.post(
     '/:id/optimize-drivers',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('strategy')
@@ -433,7 +433,7 @@ router.post(
  */
 router.post(
     '/search/geofence',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('boundingBox')
             .isObject()
@@ -470,7 +470,7 @@ router.post(
  */
 router.get(
     '/search/suggest',
-    roleMiddleware.hasPermission('zone:read'),
+    roleMiddleware.hasPermission(Permission.ZONE_READ),
     validateRequest([
         query('q')
             .isString()
@@ -492,7 +492,7 @@ router.get(
  */
 router.get(
     '/stats/overview',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('period')
             .optional()
@@ -514,7 +514,7 @@ router.get(
  */
 router.post(
     '/import',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateFile(
         'zonesFile',
         ['application/json', 'text/json', 'application/geo+json'],
@@ -542,7 +542,7 @@ router.post(
  */
 router.get(
     '/export',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('format')
             .optional()
@@ -564,7 +564,7 @@ router.get(
  */
 router.post(
     '/:id/merge',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('targetZoneId')
@@ -591,7 +591,7 @@ router.post(
  */
 router.post(
     '/:id/split',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('splitPoints')
@@ -620,7 +620,7 @@ router.post(
  */
 router.get(
     '/:id/heatmap',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         query('period')
@@ -642,7 +642,7 @@ router.get(
  */
 router.post(
     '/:id/simulate-load',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         zoneIdValidation,
         body('scenario')

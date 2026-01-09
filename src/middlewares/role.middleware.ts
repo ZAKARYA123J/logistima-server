@@ -35,6 +35,12 @@ export enum Permission {
     ZONE_UPDATE = 'zone:update',
     ZONE_DELETE = 'zone:delete',
     
+    // Parcel permissions
+    PARCEL_CREATE = 'parcel:create',
+    PARCEL_READ = 'parcel:read',
+    PARCEL_UPDATE = 'parcel:update',
+    PARCEL_DELETE = 'parcel:delete',
+    
     // User permissions
     USER_CREATE = 'user:create',
     USER_READ = 'user:read',
@@ -128,6 +134,7 @@ export enum OwnershipCheck {
     DELIVERY = 'delivery',
     DRIVER = 'driver',
     USER = 'user',
+    PARCEL = 'parcel',
 }
 
 export class RoleMiddleware {

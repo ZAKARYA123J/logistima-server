@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { DriverController } from '../controllers/driver.controller.js';
 import { authMiddleware } from '../middlewares/auth.middleware.js';
-import { roleMiddleware, UserRole } from '../middlewares/role.middleware.js';
+import { roleMiddleware, UserRole, Permission, OwnershipCheck } from '../middlewares/role.middleware.js';
 import { validateRequest, validateAtLeastOne } from '../middlewares/validation.middleware.js';
 import { body, param, query } from 'express-validator';
 import { logger } from '../utils/logger.js';
@@ -43,7 +43,7 @@ router.use(authMiddleware.authenticate);
  */
 router.get(
     '/',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('page')
             .optional()
@@ -87,7 +87,7 @@ router.get(
  */
 router.get(
     '/nearby',
-    roleMiddleware.hasRole(['admin', 'dispatcher', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.DISPATCHER, UserRole.SUPER_ADMIN]),
     validateRequest([
         query('lat')
             .isFloat({ min: -90, max: 90 })
@@ -125,8 +125,8 @@ router.get(
     '/:id',
     validateRequest([driverIdValidation]),
     roleMiddleware.isOwnerOrHasPermission(
-        'driver',
-        'driver:read',
+        OwnershipCheck.DRIVER,
+        Permission.DRIVER_READ,
         'id'
     ),
     driverController.getDriverById
@@ -139,7 +139,7 @@ router.get(
  */
 router.post(
     '/',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         body('name')
             .trim()
@@ -233,8 +233,8 @@ router.put(
         'vehiclePlate', 'maxCapacity', 'zones', 'status'
     ]),
     roleMiddleware.isOwnerOrHasPermission(
-        'driver',
-        'driver:update',
+        OwnershipCheck.DRIVER,
+        Permission.DRIVER_UPDATE,
         'id'
     ),
     driverController.updateDriver
@@ -267,8 +267,8 @@ router.patch(
             .toFloat(),
     ]),
     roleMiddleware.isOwnerOrHasPermission(
-        'driver',
-        'driver:update',
+        OwnershipCheck.DRIVER,
+        Permission.DRIVER_UPDATE,
         'id'
     ),
     driverController.updateDriverLocation
@@ -296,8 +296,8 @@ router.patch(
             .withMessage('Valid ISO 8601 date is required'),
     ]),
     roleMiddleware.isOwnerOrHasPermission(
-        'driver',
-        'driver:update',
+        OwnershipCheck.DRIVER,
+        Permission.DRIVER_UPDATE,
         'id'
     ),
     driverController.updateDriverStatus
@@ -311,7 +311,7 @@ router.patch(
 router.delete(
     '/:id',
     validateRequest([driverIdValidation]),
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     driverController.deleteDriver
 );
 
@@ -348,8 +348,8 @@ router.get(
             .toInt(),
     ]),
     roleMiddleware.isOwnerOrHasPermission(
-        'driver',
-        'driver:read',
+        OwnershipCheck.DRIVER,
+        Permission.DRIVER_READ,
         'id'
     ),
     driverController.getDriverDeliveries
@@ -364,8 +364,8 @@ router.get(
     '/:id/stats',
     validateRequest([driverIdValidation]),
     roleMiddleware.isOwnerOrHasPermission(
-        'driver',
-        'driver:read',
+        OwnershipCheck.DRIVER,
+        Permission.DRIVER_READ,
         'id'
     ),
     driverController.getDriverStats
@@ -513,7 +513,7 @@ router.post(
  */
 router.get(
     '/:id/analytics',
-    roleMiddleware.hasRole(['admin', 'super_admin']),
+    roleMiddleware.hasRole([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
     validateRequest([
         driverIdValidation,
         query('period')
