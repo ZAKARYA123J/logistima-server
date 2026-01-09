@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: app_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: root
     ports:
       - "54321:5432"
     volumes:
@@ -25,8 +25,8 @@ services:
     build: .
     container_name: api
     restart: unless-stopped
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
     environment:
       - CI=true
       - DB_HOST=postgres

@@ -1,13 +1,21 @@
 import express from "express"
+import routes from "./routes/index.js"
+import {sequelize} from "./config/database.js"
+import "./models/index.js"
+
 const PORT = process.env.PORT || 3000;
 export const app = express()
 
-app.get('/health', (req, res) => {
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Routes
+app.use('/api', routes);
+
+app.get('/health', (_req, res) => {
     res.status(200).json({ status: "OK" });
 });
-
-import {sequelize} from "./config/database.js"
-import "../src/models/index.js"
 
 async function bootstrap() {
     const MAX_RETRIES = 20;
